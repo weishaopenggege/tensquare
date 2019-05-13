@@ -2,6 +2,8 @@ package com.tensquare.qa.controller;
 import java.util.List;
 import java.util.Map;
 
+import com.tensquare.qa.client.LabelClient;
+import io.jsonwebtoken.Claims;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -17,6 +19,9 @@ import com.tensquare.qa.service.ProblemService;
 import entity.PageResult;
 import entity.Result;
 import entity.StatusCode;
+
+import javax.servlet.http.HttpServletRequest;
+
 /**
  * 控制器层
  * @author Administrator
@@ -29,8 +34,13 @@ public class ProblemController {
 
 	@Autowired
 	private ProblemService problemService;
-	
-	
+
+    @Autowired
+    private HttpServletRequest request;
+
+    @Autowired
+    private LabelClient labelClient;
+
 	/**
 	 * 查询全部数据
 	 * @return
@@ -80,7 +90,12 @@ public class ProblemController {
 	 */
 	@RequestMapping(method=RequestMethod.POST)
 	public Result add(@RequestBody Problem problem  ){
-		problemService.add(problem);
+        Claims claims = (Claims) request.getAttribute("user_claims");
+        if(claims==null){
+            return new Result(false,StatusCode.ACCESSERROR,"无权访问");
+        }
+        problem.setUserid(claims.getId());
+        problemService.add(problem);
 		return new Result(true,StatusCode.OK,"增加成功");
 	}
 	
@@ -145,5 +160,16 @@ public class ProblemController {
         Page<Problem> pageList = problemService.findWaitListByLabelId(labelid, page, size);
         PageResult<Problem> pageResult = new PageResult<>(pageList.getTotalElements(), pageList.getContent());
         return Result.success("查询成功",pageResult);
+    }
+
+    /**
+     * 调用base微服务方法
+     * @param labelId
+     * @return
+     */
+    @RequestMapping(value = "/label/{labelId}",method = RequestMethod.GET)
+    public Result findLabelById(@PathVariable(value = "labelId") String labelId){
+        Result result = labelClient.findById(labelId);
+        return result;
     }
 }
