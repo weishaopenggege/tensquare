@@ -11,6 +11,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import util.IdWorker;
 
 import javax.persistence.criteria.CriteriaBuilder;
@@ -222,5 +223,23 @@ public class UserService {
         }else{
             return null;
         }
+    }
+
+	/**
+	 *  更新粉丝数
+	 * @param x
+	 */
+	@Transactional
+	public void  incFanscount(String userid,int x){
+		userDao.incFanscount(userid,x);
+	}
+
+    /**
+     *  更新关注数
+     * @param x
+     */
+    @Transactional
+    public void  incFollowcount(String userid,int x){
+        userDao.incFollowcount(userid,x);
     }
 }

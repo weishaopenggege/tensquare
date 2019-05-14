@@ -1,0 +1,12 @@
+spring:
+  application:
+    name: tensquare-config
+  cloud:
+    config:
+      server:
+        git:
+          uri: https://gitee.com/genius-wsp/tensquare-config.git
+          #username:
+          #password:
+server:
+  port: 12000
